@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Sample Player Polifónico</title>
+    <title>Sampler Player</title>
     <style>
         /* Los estilos permanecen iguales */
         body {
@@ -19,18 +19,25 @@
             text-align: center; 
             color: #ffffff;
         }
+        .controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
         #pad-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 20px;
-            margin-top: 20px;
-            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
         }
         .pad {
             position: relative;
-            padding: 30px 20px;
+            padding-top: 100%;
             text-align: center;
-            border-radius: 40px;
+            border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
             user-select: none;
@@ -39,64 +46,47 @@
             color: #2F2E3E;
             font-weight: bold;
         }
-        .bank-button {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
+        .pad-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             display: flex;
             justify-content: center;
             align-items: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            user-select: none;
-            -webkit-user-select: none;
-            -webkit-touch-callout: none;
-            font-weight: bold;
-            font-size: 24px;
-            margin: 0 auto 20px;
-            background-color: #F5E6D3;
-            box-shadow: 8px 8px 16px #25242f, -8px -8px 16px #39384d;
-        }
-        .pad::after {
-            content: attr(data-number);
-            position: absolute;
-            bottom: 10px;
-            right: 15px;
             font-size: 24px;
         }
-        .pad:nth-child(4n+1) { background-color: #E6E8BF; box-shadow: 8px 8px 16px #25242f, -8px -8px 16px #39384d; }
-        .pad:nth-child(4n+2) { background-color: #DDDA00; box-shadow: 8px 8px 16px #25242f, -8px -8px 16px #39384d; }
-        .pad:nth-child(4n+3) { background-color: #F27900; box-shadow: 8px 8px 16px #25242f, -8px -8px 16px #39384d; }
-        .pad:nth-child(4n) { background-color: #DD1D00; box-shadow: 8px 8px 16px #25242f, -8px -8px 16px #39384d; }
-        .pad:active, .pad.playing {
-            box-shadow: inset 8px 8px 16px rgba(0,0,0,0.2),
-                        inset -8px -8px 16px rgba(255,255,255,0.1);
-            transform: scale(0.95);
-        }
-        .bank-button:active, .bank-button.active {
-            box-shadow: inset 8px 8px 16px rgba(0,0,0,0.1),
-                        inset -8px -8px 16px rgba(255,255,255,0.1);
-            transform: scale(0.95);
-        }
-        .pad.loaded { opacity: 1; }
-        #start-audio {
-            display: block;
-            margin: 20px auto;
+        #rec-button, #start-audio {
             padding: 15px 30px;
             font-size: 18px;
             border: none;
             border-radius: 40px;
-            background: #E6E8BF;
-            color: #2F2E3E;
-            box-shadow: 8px 8px 16px #25242f, -8px -8px 16px #39384d;
             cursor: pointer;
             transition: all 0.3s ease;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            font-weight: bold;
         }
-        #start-audio:active {
+        #rec-button {
+            background-color: #DD1D00;
+            color: #ffffff;
+        }
+        #start-audio {
+            background-color: #E6E8BF;
+            color: #2F2E3E;
+        }
+        .pad:nth-child(4n+1) { background-color: #E6E8BF; }
+        .pad:nth-child(4n+2) { background-color: #DDDA00; }
+        .pad:nth-child(4n+3) { background-color: #F27900; }
+        .pad:nth-child(4n) { background-color: #DD1D00; }
+        .pad:active, .pad.playing, #rec-button:active, #rec-button.active, #start-audio:active {
             box-shadow: inset 8px 8px 16px rgba(0,0,0,0.2),
                         inset -8px -8px 16px rgba(255,255,255,0.1);
             transform: scale(0.95);
         }
+        .pad.loaded { opacity: 1; }
         #status-message {
             text-align: center;
             margin-top: 20px;
@@ -106,32 +96,35 @@
     </style>
 </head>
 <body>
-    <h1>Sample Player Polifónico</h1>
-    <button id="start-audio">Iniciar Audio</button>
+    <h1>Sampler Player</h1>
+    <div class="controls">
+        <button id="start-audio">Iniciar Audio</button>
+        <button id="rec-button">REC</button>
+    </div>
     <div id="status-message"></div>
     <div id="pad-grid"></div>
 
     <script>
         let audioContext;
-        let samples = { A: {}, B: {}, C: {}, D: {} };
+        let samples = {};
         let activeSources = {};
         let audioInitialized = false;
-        let midiAccess = null;
         let touchedPads = new Set();
-        let currentBank = 'A';
-
-        // Reemplaza esto con la URL base de tu repositorio de GitHub
-        const baseUrl = 'https://github.com/sebasdv/sampleplayer/blob/main/samples/';
+        let isRecording = false;
+        let mediaRecorder;
+        let recordedChunks = [];
+        let midiAccess = null;
 
         document.getElementById('start-audio').addEventListener('click', initAudio);
+        document.getElementById('rec-button').addEventListener('click', toggleRecordingMode);
 
         function initAudio() {
             try {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 audioInitialized = true;
                 document.getElementById('start-audio').disabled = true;
-                updateStatus('Audio iniciado. Cargando samples...');
-                loadAllSamples();
+                updateStatus('Audio iniciado. Listo para grabar y reproducir.');
+                createPadGrid();
                 initMIDI();
             } catch (error) {
                 console.error('Error al iniciar el audio:', error);
@@ -176,95 +169,109 @@
 
         function createPadGrid() {
             const grid = document.getElementById('pad-grid');
-            const bankLetters = ['A', 'B', 'C', 'D'];
-            for (let i = 0; i < 4; i++) {
-                const bankButton = document.createElement('div');
-                bankButton.className = 'bank-button';
-                bankButton.textContent = bankLetters[i];
-                bankButton.style.color = getColumnColor(i + 1);
-                bankButton.onclick = () => switchBank(bankLetters[i]);
-                grid.appendChild(bankButton);
-            }
             for (let i = 1; i <= 16; i++) {
                 const pad = document.createElement('div');
                 pad.className = 'pad';
                 pad.dataset.number = i;
-                pad.dataset.padNumber = i;
+                const padContent = document.createElement('div');
+                padContent.className = 'pad-content';
+                padContent.textContent = i;
+                pad.appendChild(padContent);
 
                 pad.addEventListener('touchstart', handlePadInteraction, { passive: false });
                 pad.addEventListener('touchend', handlePadTouchEnd, { passive: false });
                 pad.addEventListener('mousedown', handlePadInteraction);
+                pad.addEventListener('mouseup', handlePadMouseUp);
 
                 grid.appendChild(pad);
             }
         }
 
-        function getColumnColor(column) {
-            switch (column) {
-                case 1: return '#2F2E3E';
-                case 2: return '#2F2E3E';
-                case 3: return '#2F2E3E';
-                case 4: return '#2F2E3E';
-                default: return '#2F2E3E';
-            }
-        }
-
-        function switchBank(bank) {
-            currentBank = bank;
-            updateStatus(`Banco actual: ${bank}`);
-            document.querySelectorAll('.bank-button').forEach(btn => {
-                btn.classList.toggle('active', btn.textContent === bank);
-            });
-            updatePadLoadedState();
-        }
-
-        function updatePadLoadedState() {
-            for (let i = 1; i <= 16; i++) {
-                const pad = document.querySelector(`.pad:nth-child(${i + 4})`);
-                pad.classList.toggle('loaded', !!samples[currentBank][i]);
-            }
+        function toggleRecordingMode() {
+            isRecording = !isRecording;
+            const recButton = document.getElementById('rec-button');
+            recButton.classList.toggle('active', isRecording);
+            recButton.textContent = isRecording ? "STOP" : "REC";
+            updateStatus(isRecording ? "Modo de grabación activado. Presiona un pad para grabar." : "Modo de grabación desactivado.");
         }
 
         function handlePadInteraction(event) {
             event.preventDefault();
-            const padNumber = parseInt(event.currentTarget.dataset.padNumber);
+            const padNumber = parseInt(event.currentTarget.dataset.number);
+            
+            if (isRecording) {
+                if (event.type === 'mousedown' || (event.type === 'touchstart' && !touchedPads.has(padNumber))) {
+                    startRecording(padNumber);
+                }
+            } else {
+                playPad(padNumber);
+            }
+            
             if (event.type === 'touchstart' && !touchedPads.has(padNumber)) {
                 touchedPads.add(padNumber);
             }
-            playPad(padNumber);
         }
 
         function handlePadTouchEnd(event) {
             event.preventDefault();
-            const padNumber = parseInt(event.currentTarget.dataset.padNumber);
+            const padNumber = parseInt(event.currentTarget.dataset.number);
             touchedPads.delete(padNumber);
+            
+            if (isRecording) {
+                stopRecording(padNumber);
+            }
         }
 
-        function loadAllSamples() {
-            const banks = ['A', 'B', 'C', 'D'];
-            let loadedCount = 0;
-            const totalSamples = banks.length * 16;
+        function handlePadMouseUp(event) {
+            const padNumber = parseInt(event.currentTarget.dataset.number);
+            
+            if (isRecording) {
+                stopRecording(padNumber);
+            }
+        }
 
-            banks.forEach(bank => {
-                for (let i = 1; i <= 16; i++) {
-                    const url = `${baseUrl}${bank.toLowerCase()}_${i}.wav`;
-                    fetch(url)
-                        .then(response => response.arrayBuffer())
-                        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
-                        .then(audioBuffer => {
-                            samples[bank][i] = audioBuffer;
-                            loadedCount++;
-                            if (bank === currentBank) {
-                                document.querySelector(`.pad:nth-child(${i + 4})`).classList.add('loaded');
-                            }
-                            updateStatus(`Cargando samples: ${loadedCount}/${totalSamples}`);
-                            if (loadedCount === totalSamples) {
-                                updateStatus('Todos los samples cargados. Listo para reproducir.');
-                            }
-                        })
-                        .catch(error => console.error(`Error loading sample ${bank}_${i}:`, error));
-                }
-            });
+        function startRecording(padNumber) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = (event) => {
+                        recordedChunks.push(event.data);
+                    };
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        assignRecordingToPad(padNumber, audioUrl);
+                        recordedChunks = [];
+                    };
+                    mediaRecorder.start();
+                    updateStatus(`Grabando para el Pad ${padNumber}...`);
+                })
+                .catch(error => {
+                    console.error('Error accessing the microphone', error);
+                    updateStatus('Error al acceder al micrófono');
+                });
+        }
+
+        function stopRecording(padNumber) {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                updateStatus(`Grabación finalizada para el Pad ${padNumber}`);
+            }
+        }
+
+        function assignRecordingToPad(padNumber, audioUrl) {
+            fetch(audioUrl)
+                .then(response => response.arrayBuffer())
+                .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+                .then(audioBuffer => {
+                    samples[padNumber] = audioBuffer;
+                    updateStatus(`Grabación asignada al Pad ${padNumber}`);
+                    document.querySelector(`.pad:nth-child(${padNumber})`).classList.add('loaded');
+                })
+                .catch(error => {
+                    console.error('Error assigning recording to pad', error);
+                    updateStatus('Error al asignar la grabación al pad');
+                });
         }
 
         function playPad(padNumber) {
@@ -272,20 +279,20 @@
                 updateStatus('Por favor, inicia el audio antes de reproducir samples.');
                 return;
             }
-            if (samples[currentBank][padNumber]) {
+            if (samples[padNumber]) {
                 if (activeSources[padNumber]) {
                     activeSources[padNumber].stop();
                     activeSources[padNumber].disconnect();
                 }
 
                 const source = audioContext.createBufferSource();
-                source.buffer = samples[currentBank][padNumber];
+                source.buffer = samples[padNumber];
                 source.connect(audioContext.destination);
                 source.start(0);
 
                 activeSources[padNumber] = source;
 
-                const pad = document.querySelector(`.pad:nth-child(${padNumber + 4})`);
+                const pad = document.querySelector(`.pad:nth-child(${padNumber})`);
                 pad.classList.add('playing');
 
                 source.onended = () => {
@@ -293,13 +300,12 @@
                     delete activeSources[padNumber];
                 };
 
-                updateStatus(`Reproduciendo Pad ${padNumber} del Banco ${currentBank}`);
+                updateStatus(`Reproduciendo Pad ${padNumber}`);
             } else {
-                updateStatus(`No hay sample cargado en el Pad ${padNumber} del Banco ${currentBank}`);
+                updateStatus(`No hay grabación asignada al Pad ${padNumber}`);
             }
         }
 
-        createPadGrid();
         updateStatus('Por favor, inicia el audio para comenzar.');
     </script>
 </body>
