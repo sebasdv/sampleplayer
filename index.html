@@ -6,6 +6,7 @@
     <meta name="mobile-web-app-capable" content="yes">
     <title>Sampler Player</title>
     <style>
+        /* Los estilos permanecen iguales */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -92,30 +93,6 @@
             font-weight: bold;
             color: #DDDA00;
         }
-        .pad-controls {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            display: flex;
-            gap: 5px;
-        }
-        .load-audio {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin: 2px;
-            cursor: pointer;
-            border-radius: 5px;
-            touch-action: manipulation;
-        }
-        .load-audio input[type="file"] {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -201,65 +178,12 @@
                 padContent.textContent = i;
                 pad.appendChild(padContent);
 
-                const padControls = document.createElement('div');
-                padControls.className = 'pad-controls';
-                const loadButton = createLoadButton(i);
-                padControls.appendChild(loadButton);
-                pad.appendChild(padControls);
-
                 pad.addEventListener('touchstart', handlePadInteraction, { passive: false });
                 pad.addEventListener('touchend', handlePadTouchEnd, { passive: false });
                 pad.addEventListener('mousedown', handlePadInteraction);
                 pad.addEventListener('mouseup', handlePadMouseUp);
 
                 grid.appendChild(pad);
-            }
-        }
-
-        function createLoadButton(padNumber) {
-            const label = document.createElement('label');
-            label.className = 'load-audio';
-            label.textContent = 'Load';
-
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'audio/wav';
-            
-            label.addEventListener('click', (event) => {
-                event.preventDefault();
-                input.click();
-            });
-
-            input.addEventListener('change', (event) => handleFileSelect(event, padNumber));
-
-            label.appendChild(input);
-            return label;
-        }
-
-        function handleFileSelect(event, padNumber) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const arrayBuffer = e.target.result;
-                    audioContext.decodeAudioData(arrayBuffer)
-                        .then(audioBuffer => {
-                            samples[padNumber] = audioBuffer;
-                            updateStatus(`Archivo de audio cargado en el Pad ${padNumber}`);
-                            document.querySelector(`.pad:nth-child(${padNumber})`).classList.add('loaded');
-                        })
-                        .catch(error => {
-                            console.error('Error decoding audio data:', error);
-                            updateStatus('Error al decodificar el archivo de audio');
-                        });
-                };
-                reader.onerror = function(error) {
-                    console.error('Error reading file:', error);
-                    updateStatus('Error al leer el archivo');
-                };
-                reader.readAsArrayBuffer(file);
-            } else {
-                updateStatus('No se seleccionó ningún archivo');
             }
         }
 
