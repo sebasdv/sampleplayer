@@ -4,9 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
-    <title>Sampler Player</title>
+    <title>Sampler Player con Visualizador</title>
     <style>
-        /* Los estilos permanecen iguales */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -45,17 +44,26 @@
             -webkit-touch-callout: none;
             color: #2F2E3E;
             font-weight: bold;
+            overflow: hidden;
         }
         .pad-content {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
+            bottom: 30%;
             display: flex;
             justify-content: center;
             align-items: center;
             font-size: 24px;
+        }
+        .visualizer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background-color: rgba(0,0,0,0.1);
         }
         #rec-button, #start-audio {
             padding: 15px 30px;
@@ -93,10 +101,34 @@
             font-weight: bold;
             color: #DDDA00;
         }
+        .pad-controls {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            display: flex;
+            gap: 5px;
+        }
+        .load-audio {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            margin: 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            touch-action: manipulation;
+        }
+        .load-audio input[type="file"] {
+            display: none;
+        }
     </style>
 </head>
 <body>
-    <h1>Sampler Player</h1>
+    <h1>Sampler Player con Visualizador</h1>
     <div class="controls">
         <button id="start-audio">Iniciar Audio</button>
         <button id="rec-button">REC</button>
@@ -105,208 +137,332 @@
     <div id="pad-grid"></div>
 
     <script>
-        let audioContext;
-        let samples = {};
-        let activeSources = {};
-        let audioInitialized = false;
-        let touchedPads = new Set();
-        let isRecording = false;
-        let mediaRecorder;
-        let recordedChunks = [];
-        let midiAccess = null;
+    let audioContext;
+    let samples = {};
+    let activeSources = {};
+    let audioInitialized = false;
+    let touchedPads = new Set();
+    let isRecording = false;
+    let mediaRecorder;
+    let recordedChunks = [];
+    let midiAccess = null;
+    let visualizers = {};
 
-        document.getElementById('start-audio').addEventListener('click', initAudio);
-        document.getElementById('rec-button').addEventListener('click', toggleRecordingMode);
+    document.getElementById('start-audio').addEventListener('click', initAudio);
+    document.getElementById('rec-button').addEventListener('click', toggleRecordingMode);
 
-        function initAudio() {
-            try {
-                audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                audioInitialized = true;
-                document.getElementById('start-audio').disabled = true;
-                updateStatus('Audio iniciado. Listo para grabar y reproducir.');
-                createPadGrid();
-                initMIDI();
-            } catch (error) {
-                console.error('Error al iniciar el audio:', error);
-                updateStatus('Error al iniciar el audio. Por favor, recarga la página e intenta de nuevo.');
-            }
+    function initAudio() {
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            audioInitialized = true;
+            document.getElementById('start-audio').disabled = true;
+            updateStatus('Audio iniciado. Listo para grabar y reproducir.');
+            createPadGrid();
+            initMIDI();
+        } catch (error) {
+            console.error('Error al iniciar el audio:', error);
+            updateStatus('Error al iniciar el audio. Por favor, recarga la página e intenta de nuevo.');
         }
+    }
 
-        function initMIDI() {
-            if (navigator.requestMIDIAccess) {
-                navigator.requestMIDIAccess()
-                    .then(onMIDISuccess, onMIDIFailure);
-            } else {
-                updateStatus('Web MIDI API no soportada en este navegador.');
-            }
+    function initMIDI() {
+        if (navigator.requestMIDIAccess) {
+            navigator.requestMIDIAccess()
+                .then(onMIDISuccess, onMIDIFailure);
+        } else {
+            updateStatus('Web MIDI API no soportada en este navegador.');
         }
+    }
 
-        function onMIDISuccess(midiAccessObj) {
-            midiAccess = midiAccessObj;
-            const inputs = midiAccess.inputs.values();
-            for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
-                input.value.onmidimessage = onMIDIMessage;
-            }
-            updateStatus('MIDI conectado. Puedes usar un controlador MIDI para activar los pads.');
+    function onMIDISuccess(midiAccessObj) {
+        midiAccess = midiAccessObj;
+        const inputs = midiAccess.inputs.values();
+        for (let input = inputs.next(); input && !input.done; input = inputs.next()) {
+            input.value.onmidimessage = onMIDIMessage;
         }
+        updateStatus('MIDI conectado. Puedes usar un controlador MIDI para activar los pads.');
+    }
 
-        function onMIDIFailure(error) {
-            console.error('Error al acceder al MIDI:', error);
-            updateStatus('Error al conectar MIDI. Puedes seguir usando el mouse o touch.');
+    function onMIDIFailure(error) {
+        console.error('Error al acceder al MIDI:', error);
+        updateStatus('Error al conectar MIDI. Puedes seguir usando el mouse o touch.');
+    }
+
+    function onMIDIMessage(message) {
+        const [status, note, velocity] = message.data;
+        if (status === 144 && velocity > 0) { // Note On
+            const padNumber = note % 16 + 1; // Mapear notas MIDI a pads (1-16)
+            playPad(padNumber);
         }
+    }
 
-        function onMIDIMessage(message) {
-            const [status, note, velocity] = message.data;
-            if (status === 144 && velocity > 0) { // Note On
-                const padNumber = note % 16 + 1; // Mapear notas MIDI a pads (1-16)
-                playPad(padNumber);
-            }
+    function updateStatus(message) {
+        document.getElementById('status-message').textContent = message;
+    }
+
+    function createPadGrid() {
+        const grid = document.getElementById('pad-grid');
+        for (let i = 1; i <= 16; i++) {
+            const pad = document.createElement('div');
+            pad.className = 'pad';
+            pad.dataset.number = i;
+            const padContent = document.createElement('div');
+            padContent.className = 'pad-content';
+            padContent.textContent = i;
+            pad.appendChild(padContent);
+
+            const visualizer = document.createElement('canvas');
+            visualizer.className = 'visualizer';
+            pad.appendChild(visualizer);
+
+            const padControls = document.createElement('div');
+            padControls.className = 'pad-controls';
+            const loadButton = createLoadButton(i);
+            padControls.appendChild(loadButton);
+            pad.appendChild(padControls);
+
+            pad.addEventListener('touchstart', handlePadInteraction, { passive: false });
+            pad.addEventListener('touchend', handlePadTouchEnd, { passive: false });
+            pad.addEventListener('mousedown', handlePadInteraction);
+            pad.addEventListener('mouseup', handlePadMouseUp);
+
+            grid.appendChild(pad);
         }
+    }
 
-        function updateStatus(message) {
-            document.getElementById('status-message').textContent = message;
-        }
+    function createLoadButton(padNumber) {
+        const label = document.createElement('label');
+        label.className = 'load-audio';
+        label.textContent = 'Load';
 
-        function createPadGrid() {
-            const grid = document.getElementById('pad-grid');
-            for (let i = 1; i <= 16; i++) {
-                const pad = document.createElement('div');
-                pad.className = 'pad';
-                pad.dataset.number = i;
-                const padContent = document.createElement('div');
-                padContent.className = 'pad-content';
-                padContent.textContent = i;
-                pad.appendChild(padContent);
-
-                pad.addEventListener('touchstart', handlePadInteraction, { passive: false });
-                pad.addEventListener('touchend', handlePadTouchEnd, { passive: false });
-                pad.addEventListener('mousedown', handlePadInteraction);
-                pad.addEventListener('mouseup', handlePadMouseUp);
-
-                grid.appendChild(pad);
-            }
-        }
-
-        function toggleRecordingMode() {
-            isRecording = !isRecording;
-            const recButton = document.getElementById('rec-button');
-            recButton.classList.toggle('active', isRecording);
-            recButton.textContent = isRecording ? "STOP" : "REC";
-            updateStatus(isRecording ? "Modo de grabación activado. Presiona un pad para grabar." : "Modo de grabación desactivado.");
-        }
-
-        function handlePadInteraction(event) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'audio/wav';
+        
+        label.addEventListener('click', (event) => {
             event.preventDefault();
-            const padNumber = parseInt(event.currentTarget.dataset.number);
-            
-            if (isRecording) {
-                if (event.type === 'mousedown' || (event.type === 'touchstart' && !touchedPads.has(padNumber))) {
-                    startRecording(padNumber);
-                }
-            } else {
-                playPad(padNumber);
-            }
-            
-            if (event.type === 'touchstart' && !touchedPads.has(padNumber)) {
-                touchedPads.add(padNumber);
-            }
+            input.click();
+        });
+
+        input.addEventListener('change', (event) => handleFileSelect(event, padNumber));
+
+        label.appendChild(input);
+        return label;
+    }
+
+    function handleFileSelect(event, padNumber) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const arrayBuffer = e.target.result;
+                audioContext.decodeAudioData(arrayBuffer)
+                    .then(audioBuffer => {
+                        samples[padNumber] = audioBuffer;
+                        updateStatus(`Archivo de audio cargado en el Pad ${padNumber}`);
+                        document.querySelector(`.pad:nth-child(${padNumber})`).classList.add('loaded');
+                    })
+                    .catch(error => {
+                        console.error('Error decoding audio data:', error);
+                        updateStatus('Error al decodificar el archivo de audio');
+                    });
+            };
+            reader.onerror = function(error) {
+                console.error('Error reading file:', error);
+                updateStatus('Error al leer el archivo');
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            updateStatus('No se seleccionó ningún archivo');
         }
+    }
 
-        function handlePadTouchEnd(event) {
-            event.preventDefault();
-            const padNumber = parseInt(event.currentTarget.dataset.number);
-            touchedPads.delete(padNumber);
-            
-            if (isRecording) {
-                stopRecording(padNumber);
+    function toggleRecordingMode() {
+        isRecording = !isRecording;
+        const recButton = document.getElementById('rec-button');
+        recButton.classList.toggle('active', isRecording);
+        recButton.textContent = isRecording ? "STOP" : "REC";
+        updateStatus(isRecording ? "Modo de grabación activado. Presiona un pad para grabar." : "Modo de grabación desactivado.");
+    }
+
+    function handlePadInteraction(event) {
+        event.preventDefault();
+        const padNumber = parseInt(event.currentTarget.dataset.number);
+        
+        if (isRecording) {
+            if (event.type === 'mousedown' || (event.type === 'touchstart' && !touchedPads.has(padNumber))) {
+                startRecording(padNumber);
             }
+        } else {
+            playPad(padNumber);
         }
-
-        function handlePadMouseUp(event) {
-            const padNumber = parseInt(event.currentTarget.dataset.number);
-            
-            if (isRecording) {
-                stopRecording(padNumber);
-            }
+        
+        if (event.type === 'touchstart' && !touchedPads.has(padNumber)) {
+            touchedPads.add(padNumber);
         }
+    }
 
-        function startRecording(padNumber) {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.ondataavailable = (event) => {
-                        recordedChunks.push(event.data);
-                    };
-                    mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        assignRecordingToPad(padNumber, audioUrl);
-                        recordedChunks = [];
-                    };
-                    mediaRecorder.start();
-                    updateStatus(`Grabando para el Pad ${padNumber}...`);
-                })
-                .catch(error => {
-                    console.error('Error accessing the microphone', error);
-                    updateStatus('Error al acceder al micrófono');
-                });
+    function handlePadTouchEnd(event) {
+        event.preventDefault();
+        const padNumber = parseInt(event.currentTarget.dataset.number);
+        touchedPads.delete(padNumber);
+        
+        if (isRecording) {
+            stopRecording(padNumber);
         }
+    }
 
-        function stopRecording(padNumber) {
-            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                mediaRecorder.stop();
-                updateStatus(`Grabación finalizada para el Pad ${padNumber}`);
-            }
+    function handlePadMouseUp(event) {
+        const padNumber = parseInt(event.currentTarget.dataset.number);
+        
+        if (isRecording) {
+            stopRecording(padNumber);
         }
+    }
 
-        function assignRecordingToPad(padNumber, audioUrl) {
-            fetch(audioUrl)
-                .then(response => response.arrayBuffer())
-                .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
-                .then(audioBuffer => {
-                    samples[padNumber] = audioBuffer;
-                    updateStatus(`Grabación asignada al Pad ${padNumber}`);
-                    document.querySelector(`.pad:nth-child(${padNumber})`).classList.add('loaded');
-                })
-                .catch(error => {
-                    console.error('Error assigning recording to pad', error);
-                    updateStatus('Error al asignar la grabación al pad');
-                });
-        }
-
-        function playPad(padNumber) {
-            if (!audioInitialized) {
-                updateStatus('Por favor, inicia el audio antes de reproducir samples.');
-                return;
-            }
-            if (samples[padNumber]) {
-                if (activeSources[padNumber]) {
-                    activeSources[padNumber].stop();
-                    activeSources[padNumber].disconnect();
-                }
-
-                const source = audioContext.createBufferSource();
-                source.buffer = samples[padNumber];
-                source.connect(audioContext.destination);
-                source.start(0);
-
-                activeSources[padNumber] = source;
-
-                const pad = document.querySelector(`.pad:nth-child(${padNumber})`);
-                pad.classList.add('playing');
-
-                source.onended = () => {
-                    pad.classList.remove('playing');
-                    delete activeSources[padNumber];
+    function startRecording(padNumber) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = (event) => {
+                    recordedChunks.push(event.data);
                 };
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(recordedChunks, { type: 'audio/webm' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    assignRecordingToPad(padNumber, audioUrl);
+                    recordedChunks = [];
+                };
+                mediaRecorder.start();
+                updateStatus(`Grabando para el Pad ${padNumber}...`);
+            })
+            .catch(error => {
+                console.error('Error accessing the microphone', error);
+                updateStatus('Error al acceder al micrófono');
+            });
+    }
 
-                updateStatus(`Reproduciendo Pad ${padNumber}`);
-            } else {
-                updateStatus(`No hay grabación asignada al Pad ${padNumber}`);
+    function stopRecording(padNumber) {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            updateStatus(`Grabación finalizada para el Pad ${padNumber}`);
+        }
+    }
+
+    function assignRecordingToPad(padNumber, audioUrl) {
+        fetch(audioUrl)
+            .then(response => response.arrayBuffer())
+            .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
+            .then(audioBuffer => {
+                samples[padNumber] = audioBuffer;
+                updateStatus(`Grabación asignada al Pad ${padNumber}`);
+                document.querySelector(`.pad:nth-child(${padNumber})`).classList.add('loaded');
+            })
+            .catch(error => {
+                console.error('Error assigning recording to pad', error);
+                updateStatus('Error al asignar la grabación al pad');
+            });
+    }
+
+    function playPad(padNumber) {
+        if (!audioInitialized) {
+            updateStatus('Por favor, inicia el audio antes de reproducir samples.');
+            return;
+        }
+        if (samples[padNumber]) {
+            if (activeSources[padNumber]) {
+                activeSources[padNumber].stop();
+                activeSources[padNumber].disconnect();
             }
+
+            const source = audioContext.createBufferSource();
+            source.buffer = samples[padNumber];
+
+            const analyser = audioContext.createAnalyser();
+            analyser.fftSize = 256;
+
+            source.connect(analyser);
+            analyser.connect(audioContext.destination);
+
+            source.start(0);
+            activeSources[padNumber] = source;
+
+            const pad = document.querySelector(`.pad:nth-child(${padNumber})`);
+            pad.classList.add('playing');
+
+            source.onended = () => {
+                pad.classList.remove('playing');
+                delete activeSources[padNumber];
+            };
+
+            visualize(padNumber, analyser);
+
+            updateStatus(`Reproduciendo Pad ${padNumber}`);
+        } else {
+            updateStatus(`No hay grabación asignada al Pad ${padNumber}`);
+        }
+    }
+
+    function visualize(padNumber, analyser) {
+        const canvas = document.querySelector(`.pad:nth-child(${padNumber}) .visualizer`);
+        const canvasCtx = canvas.getContext('2d');
+        const bufferLength = analyser.frequencyBinCount;
+        const dataArray = new Uint8Array(bufferLength);
+
+        function draw() {
+            const WIDTH = canvas.width;
+            const HEIGHT = canvas.height;
+
+            requestAnimationFrame(draw);
+
+            analyser.getByteTimeDomainData(dataArray);
+
+            canvasCtx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            canvasCtx.fillRect(0, 0, WIDTH, HEIGHT);
+
+            canvasCtx.lineWidth = 2;
+            canvasCtx.strokeStyle = 'rgb(0, 0, 0)';
+
+            canvasCtx.beginPath();
+
+            const sliceWidth = WIDTH * 1.0 / bufferLength;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = v * HEIGHT / 2;
+
+                if (i === 0) {
+                    canvasCtx.moveTo(x, y);
+                } else {
+                    canvasCtx.lineTo(x, y);
+                }
+
+                x += sliceWidth;
+            }
+
+            canvasCtx.lineTo(canvas.width, canvas.height / 2);
+            canvasCtx.stroke();
         }
 
-        updateStatus('Por favor, inicia el audio para comenzar.');
-    </script>
+        draw();
+    }
+
+    // Asegúrese de que los canvas se ajusten al tamaño de los pads
+    function resizeCanvases() {
+        const pads = document.querySelectorAll('.pad');
+        pads.forEach(pad => {
+            const canvas = pad.querySelector('.visualizer');
+            canvas.width = pad.offsetWidth;
+            canvas.height = pad.offsetHeight * 0.3; // 30% de la altura del pad
+        });
+    }
+
+    // Llamar a resizeCanvases cuando la ventana cambie de tamaño
+    window.addEventListener('resize', resizeCanvases);
+
+    // Llamar a resizeCanvases después de crear los pads
+    document.addEventListener('DOMContentLoaded', resizeCanvases);
+</script>
 </body>
 </html>
