@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Sampler Player con Visualizador</title>
-    <<style>
+    <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -35,34 +35,20 @@
         .pad {
             position: relative;
             padding-top: 100%;
-            text-align: center;
             border-radius: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;
-            color: #2F2E3E;
-            font-weight: bold;
             overflow: hidden;
-        }
-        .pad-content {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 30%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
         }
         .visualizer {
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             width: 100%;
-            height: 30%;
+            height: 100%;
             background-color: rgba(0,0,0,0.1);
         }
         #start-audio {
@@ -95,28 +81,7 @@
             font-weight: bold;
             color: #DDDA00;
         }
-        .pad-controls {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            display: flex;
-            gap: 5px;
-        }
-        .select-audio {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 10px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin: 2px;
-            cursor: pointer;
-            border-radius: 5px;
-            touch-action: manipulation;
-        }
-    </style>>
+    </style>
 </head>
 <body>
     <h1>Sampler Player con Visualizador</h1>
@@ -126,7 +91,7 @@
     <div id="status-message"></div>
     <div id="pad-grid"></div>
 
-    <<script>
+    <script>
     let audioContext;
     let samples = {};
     let activeSources = {};
@@ -135,8 +100,26 @@
     let midiAccess = null;
     let visualizers = {};
 
-    // URL base de tu repositorio de GitHub (ajusta esto según tu repositorio)
     const GITHUB_REPO_URL = 'https://raw.githubusercontent.com/sebasdv/sampleplayer/main/samples/';
+
+    const audioFiles = [
+        '01-11Stringsjura78bpm.WAV',
+        '02-Harpjura78bpm.WAV',
+        '03-CHCleanVinyl01.WAV',
+        '04-OHCleanVinyl08.WAV',
+        '05-BDDegradedVinyl11.WAV',
+        '06-SDTubeVinyl01.WAV',
+        '07-CHCleanVinyl02.WAV',
+        '08-OHCleanVinyl09.WAV',
+        '09-BDDegradedVinyl13.WAV',
+        '10-SDTubeVinyl02.WAV',
+        '11-CHCleanVinyl03.WAV',
+        '12-OHCleanVinyl10.WAV',
+        '13-BDDegradedVinyl14.WAV',
+        '14-SDTubeVinyl03.WAV',
+        '15-CHCleanVinyl04.WAV',
+        '16-OHCleanVinyl11.WAV'
+    ];
 
     document.getElementById('start-audio').addEventListener('click', initAudio);
 
@@ -148,6 +131,7 @@
             updateStatus('Audio iniciado. Listo para reproducir.');
             createPadGrid();
             initMIDI();
+            loadAllSamples();
         } catch (error) {
             console.error('Error al iniciar el audio:', error);
             updateStatus('Error al iniciar el audio. Por favor, recarga la página e intenta de nuevo.');
@@ -195,20 +179,10 @@
             const pad = document.createElement('div');
             pad.className = 'pad';
             pad.dataset.number = i;
-            const padContent = document.createElement('div');
-            padContent.className = 'pad-content';
-            padContent.textContent = i;
-            pad.appendChild(padContent);
 
             const visualizer = document.createElement('canvas');
             visualizer.className = 'visualizer';
             pad.appendChild(visualizer);
-
-            const padControls = document.createElement('div');
-            padControls.className = 'pad-controls';
-            const selectButton = createSelectButton(i);
-            padControls.appendChild(selectButton);
-            pad.appendChild(padControls);
 
             pad.addEventListener('touchstart', handlePadInteraction, { passive: false });
             pad.addEventListener('touchend', handlePadTouchEnd, { passive: false });
@@ -219,43 +193,10 @@
         }
     }
 
-    function createSelectButton(padNumber) {
-        const button = document.createElement('button');
-        button.className = 'select-audio';
-        button.textContent = 'Seleccionar';
-        button.addEventListener('click', () => selectAudioForPad(padNumber));
-        return button;
-    }
-
-    function selectAudioForPad(padNumber) {
-        // Lista de archivos de audio disponibles (ajusta según tus archivos)
-        const availableAudios = [
-            '01-11Stringsjura78bpm.WAV',
-            '02-Harpjura78bpm.WAV',
-            '03-CHCleanVinyl01.WAV',
-            '04-OHCleanVinyl08.WAV',
-            '05-BDDegradedVinyl11.WAV',
-            '06-SDTubeVinyl01.WAV',
-            '07-CHCleanVinyl02.WAV',
-            '08-OHCleanVinyl09.WAV',
-            '09-BDDegradedVinyl13.WAV',
-            '10-SDTubeVinyl02.WAV',
-            '11-CHCleanVinyl03.WAV',
-            '12-OHCleanVinyl10.WAV',
-            '13-BDDegradedVinyl14.WAV',
-            '14-SDTubeVinyl03.WAV',
-            '15-CHCleanVinyl04.WAV',
-            '16-OHCleanVinyl11.WAV',
-            // Añade más archivos según sea necesario
-        ];
-
-        const audioName = prompt(`Selecciona un audio para el Pad ${padNumber}:\n${availableAudios.join('\n')}`);
-        
-        if (audioName && availableAudios.includes(audioName)) {
-            loadAudioForPad(padNumber, audioName);
-        } else if (audioName) {
-            alert('Archivo de audio no válido. Por favor, elige uno de la lista.');
-        }
+    function loadAllSamples() {
+        audioFiles.forEach((file, index) => {
+            loadAudioForPad(index + 1, file);
+        });
     }
 
     function loadAudioForPad(padNumber, audioName) {
@@ -383,12 +324,12 @@
         pads.forEach(pad => {
             const canvas = pad.querySelector('.visualizer');
             canvas.width = pad.offsetWidth;
-            canvas.height = pad.offsetHeight * 0.3;
+            canvas.height = pad.offsetHeight;
         });
     }
 
     window.addEventListener('resize', resizeCanvases);
     document.addEventListener('DOMContentLoaded', resizeCanvases);
-</script>>
+    </script>
 </body>
 </html>
