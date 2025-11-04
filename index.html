@@ -103,6 +103,152 @@
             font-weight: bold;
             color: #d47007;
         }
+
+        /* Mobile height responsiveness */
+        @media (max-height: 800px) {
+            body {
+                padding: 15px 20px;
+            }
+            h1 {
+                font-size: 1.5rem;
+                margin: 10px 0;
+            }
+            .controls {
+                margin-bottom: 15px;
+                gap: 15px;
+            }
+            #start-audio {
+                padding: 12px 24px;
+                font-size: 16px;
+            }
+            #pad-grid {
+                gap: 15px;
+                max-width: 450px;
+            }
+            #status-message {
+                margin-top: 15px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-height: 700px) {
+            body {
+                padding: 10px 15px;
+            }
+            h1 {
+                font-size: 1.3rem;
+                margin: 8px 0;
+            }
+            .controls {
+                margin-bottom: 10px;
+                gap: 10px;
+            }
+            #start-audio {
+                padding: 10px 20px;
+                font-size: 15px;
+            }
+            #pad-grid {
+                gap: 12px;
+                max-width: 400px;
+            }
+            #status-message {
+                margin-top: 10px;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-height: 600px) {
+            body {
+                padding: 8px 12px;
+            }
+            h1 {
+                font-size: 1.1rem;
+                margin: 5px 0;
+            }
+            .controls {
+                margin-bottom: 8px;
+                gap: 8px;
+            }
+            #start-audio {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            #pad-grid {
+                gap: 10px;
+                max-width: 350px;
+            }
+            #status-message {
+                margin-top: 8px;
+                font-size: 12px;
+            }
+        }
+
+        /* Extra small height - typical mobile landscape */
+        @media (max-height: 500px) {
+            body {
+                padding: 5px 10px;
+            }
+            h1 {
+                font-size: 1rem;
+                margin: 3px 0;
+            }
+            .controls {
+                margin-bottom: 5px;
+                gap: 5px;
+            }
+            #start-audio {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            #pad-grid {
+                gap: 8px;
+                max-width: 300px;
+            }
+            .pad {
+                border-radius: 15px;
+            }
+            #status-message {
+                margin-top: 5px;
+                font-size: 11px;
+            }
+        }
+
+        /* Very small height - landscape mobile in browser */
+        @media (max-height: 400px) {
+            body {
+                padding: 3px 8px;
+            }
+            h1 {
+                font-size: 0.9rem;
+                margin: 2px 0;
+            }
+            .controls {
+                margin-bottom: 3px;
+            }
+            #start-audio {
+                padding: 5px 10px;
+                font-size: 12px;
+            }
+            #pad-grid {
+                gap: 6px;
+                max-width: 250px;
+            }
+            .pad {
+                border-radius: 12px;
+                box-shadow:
+                    6px 6px 12px rgba(163, 147, 130, 0.5),
+                    -6px -6px 12px rgba(255, 255, 255, 0.7);
+            }
+            .pad:active, .pad.playing {
+                box-shadow:
+                    inset 3px 3px 6px rgba(163, 147, 130, 0.4),
+                    inset -3px -3px 6px rgba(255, 255, 255, 0.5);
+            }
+            #status-message {
+                margin-top: 3px;
+                font-size: 10px;
+            }
+        }
     </style>
 </head>
 <body>
