@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Sampler Player con Visualizador</title>
+    <link rel="stylesheet" href="neumorphic-design.css">
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
-            background-color: #2F2E3E;
-            color: #ffffff;
+            background-color: #d9d2c6;
+            color: #333333;
             touch-action: none;
         }
-        h1 { 
-            text-align: center; 
-            color: #ffffff;
+        h1 {
+            text-align: center;
+            color: #333333;
         }
         .controls {
             display: flex;
@@ -42,6 +43,9 @@
             -webkit-user-select: none;
             -webkit-touch-callout: none;
             overflow: hidden;
+            box-shadow:
+                8px 8px 16px rgba(163, 147, 130, 0.5),
+                -8px -8px 16px rgba(255, 255, 255, 0.7);
         }
         .visualizer {
             position: absolute;
@@ -62,24 +66,42 @@
             -webkit-user-select: none;
             -webkit-touch-callout: none;
             font-weight: bold;
-            background-color: #E6E8BF;
-            color: #2F2E3E;
+            background: linear-gradient(145deg, #f59112, #d47007);
+            color: #ffffff;
+            box-shadow:
+                8px 8px 16px rgba(212, 112, 7, 0.4),
+                -8px -8px 16px rgba(255, 160, 40, 0.4);
         }
         .pad:nth-child(4n+1) { background-color: #E6E8BF; }
         .pad:nth-child(4n+2) { background-color: #DDDA00; }
         .pad:nth-child(4n+3) { background-color: #F27900; }
         .pad:nth-child(4n) { background-color: #DD1D00; }
-        .pad:active, .pad.playing, #start-audio:active {
-            box-shadow: inset 8px 8px 16px rgba(0,0,0,0.2),
-                        inset -8px -8px 16px rgba(255,255,255,0.1);
+        .pad:active, .pad.playing {
+            box-shadow:
+                inset 4px 4px 8px rgba(163, 147, 130, 0.4),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.5);
             transform: scale(0.95);
+        }
+
+        #start-audio:hover:not(:disabled) {
+            box-shadow:
+                12px 12px 24px rgba(212, 112, 7, 0.5),
+                -12px -12px 24px rgba(255, 160, 40, 0.5);
+            transform: translateY(-1px);
+        }
+
+        #start-audio:active:not(:disabled) {
+            box-shadow:
+                inset 4px 4px 8px rgba(212, 112, 7, 0.3),
+                inset -4px -4px 8px rgba(255, 160, 40, 0.3);
+            transform: translateY(0);
         }
         .pad.loaded { opacity: 1; }
         #status-message {
             text-align: center;
             margin-top: 20px;
             font-weight: bold;
-            color: #DDDA00;
+            color: #d47007;
         }
     </style>
 </head>

@@ -1,0 +1,547 @@
+/* ============================================================================
+ * SEBASDV NEUMORPHIC DESIGN SYSTEM - Braun Edition
+ * Version: 1.0.0
+ * Style: Neumorphism + Dieter Rams / Braun Industrial Design
+ * Author: sebasdv
+ * ============================================================================
+ *
+ * NEUMORPHIC BRAUN PHILOSOPHY
+ * ===========================
+ * Combines soft, tactile neumorphic UI with Dieter Rams' minimalist aesthetic
+ * - Soft shadows create depth and tangibility
+ * - Embossed (extruded) and debossed (inset) effects
+ * - Maintains functional, accessible design
+ * - Warm, industrial color palette
+ *
+ * USAGE: Include this CSS AFTER sebasdv-design-system.css
+ * ============================================================================ */
+
+:root {
+    /* Neumorphic Shadow Colors - Soft and Subtle */
+    --neu-shadow-light: rgba(255, 255, 255, 0.7);
+    --neu-shadow-dark: rgba(163, 147, 130, 0.5);
+    --neu-shadow-inset-light: rgba(255, 255, 255, 0.5);
+    --neu-shadow-inset-dark: rgba(163, 147, 130, 0.4);
+
+    /* Neumorphic Distances */
+    --neu-distance-sm: 4px;
+    --neu-distance-md: 8px;
+    --neu-distance-lg: 12px;
+    --neu-blur-sm: 8px;
+    --neu-blur-md: 16px;
+    --neu-blur-lg: 24px;
+
+    /* Enhanced background for neumorphism */
+    --neu-bg: #d9d2c6;
+    --neu-bg-light: #e5dfd5;
+    --neu-bg-dark: #cdc7bd;
+}
+
+/* ============================================================================
+ * NEUMORPHIC BASE STYLES
+ * ============================================================================ */
+
+/* Raised/Extruded Effect */
+.neu-raised {
+    background: var(--neu-bg);
+    box-shadow:
+        var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-light);
+    transition: all 0.3s ease;
+}
+
+/* Pressed/Inset Effect */
+.neu-inset {
+    background: var(--neu-bg);
+    box-shadow:
+        inset var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-inset-light);
+}
+
+/* Flat (subtle) */
+.neu-flat {
+    background: var(--neu-bg);
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-light);
+}
+
+/* ============================================================================
+ * NEUMORPHIC BUTTONS
+ * ============================================================================ */
+
+.btn.neu {
+    background: var(--neu-bg);
+    border: none;
+    box-shadow:
+        var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-light);
+    color: var(--gb-text-primary);
+    font-weight: 500;
+}
+
+.btn.neu:hover:not(:disabled) {
+    box-shadow:
+        var(--neu-distance-lg) var(--neu-distance-lg) var(--neu-blur-lg) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-lg)) calc(-1 * var(--neu-distance-lg)) var(--neu-blur-lg) var(--neu-shadow-light);
+    transform: translateY(-1px);
+}
+
+.btn.neu:active:not(:disabled),
+.btn.neu.active {
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+    transform: translateY(0);
+}
+
+/* Neumorphic Primary Button */
+.btn.neu-primary {
+    background: linear-gradient(145deg, #f59112, #d47007);
+    color: var(--gb-text-inverse);
+    box-shadow:
+        var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) rgba(212, 112, 7, 0.4),
+        calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) rgba(255, 160, 40, 0.4);
+}
+
+.btn.neu-primary:hover:not(:disabled) {
+    box-shadow:
+        var(--neu-distance-lg) var(--neu-distance-lg) var(--neu-blur-lg) rgba(212, 112, 7, 0.5),
+        calc(-1 * var(--neu-distance-lg)) calc(-1 * var(--neu-distance-lg)) var(--neu-blur-lg) rgba(255, 160, 40, 0.5);
+}
+
+/* Neumorphic Icon Buttons */
+.btn-icon.neu {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: var(--neu-bg);
+    border: none;
+    box-shadow:
+        var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-light);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-icon.neu:hover {
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-light);
+}
+
+.btn-icon.neu:active {
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+}
+
+/* ============================================================================
+ * NEUMORPHIC CARDS
+ * ============================================================================ */
+
+.card.neu {
+    background: var(--neu-bg);
+    border: none;
+    box-shadow:
+        var(--neu-distance-lg) var(--neu-distance-lg) var(--neu-blur-lg) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-lg)) calc(-1 * var(--neu-distance-lg)) var(--neu-blur-lg) var(--neu-shadow-light);
+    border-radius: 20px;
+}
+
+.card.neu-inset {
+    background: var(--neu-bg);
+    border: none;
+    box-shadow:
+        inset var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-inset-light);
+    border-radius: 20px;
+}
+
+.card.neu-interactive:hover {
+    box-shadow:
+        var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-light);
+    transform: translateY(-2px);
+}
+
+/* ============================================================================
+ * NEUMORPHIC FORM INPUTS
+ * ============================================================================ */
+
+input.neu,
+textarea.neu,
+select.neu {
+    background: var(--neu-bg);
+    border: none;
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 12px;
+    color: var(--gb-text-primary);
+    font-size: var(--font-size-base);
+    transition: all 0.3s ease;
+}
+
+input.neu:focus,
+textarea.neu:focus,
+select.neu:focus {
+    outline: none;
+    box-shadow:
+        inset var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-inset-light),
+        0 0 0 3px rgba(237, 128, 8, 0.2);
+}
+
+/* ============================================================================
+ * NEUMORPHIC TOGGLE SWITCH
+ * ============================================================================ */
+
+.toggle-switch.neu {
+    background: var(--neu-bg);
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+    border-radius: 24px;
+}
+
+.toggle-switch.neu::before {
+    background: var(--neu-bg);
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-light);
+}
+
+.toggle-input:checked + .toggle-label .toggle-switch.neu {
+    background: linear-gradient(145deg, #f59112, #d47007);
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) rgba(212, 112, 7, 0.3),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) rgba(255, 160, 40, 0.3);
+}
+
+/* ============================================================================
+ * NEUMORPHIC CHECKBOX & RADIO
+ * ============================================================================ */
+
+.checkbox-custom.neu,
+.radio-custom.neu {
+    background: var(--neu-bg);
+    border: none;
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+}
+
+.checkbox input:checked + .checkbox-custom.neu,
+.radio input:checked + .radio-custom.neu {
+    background: linear-gradient(145deg, #f59112, #d47007);
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) rgba(212, 112, 7, 0.4),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) rgba(255, 160, 40, 0.4);
+}
+
+/* ============================================================================
+ * NEUMORPHIC SLIDER/RANGE
+ * ============================================================================ */
+
+input[type="range"].slider.neu {
+    background: var(--neu-bg);
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+    border-radius: 12px;
+    height: 8px;
+}
+
+input[type="range"].slider.neu::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    background: var(--neu-bg);
+    cursor: pointer;
+    border-radius: 50%;
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-light);
+    transition: all 0.3s ease;
+}
+
+input[type="range"].slider.neu::-webkit-slider-thumb:hover {
+    box-shadow:
+        var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-light);
+}
+
+input[type="range"].slider.neu::-webkit-slider-thumb:active {
+    background: linear-gradient(145deg, #f59112, #d47007);
+}
+
+input[type="range"].slider.neu::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    background: var(--neu-bg);
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-light);
+}
+
+/* ============================================================================
+ * NEUMORPHIC PROGRESS BAR
+ * ============================================================================ */
+
+.progress.neu {
+    background: var(--neu-bg);
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+    border-radius: 12px;
+    height: 12px;
+}
+
+.progress.neu .progress-bar {
+    background: linear-gradient(145deg, #f59112, #d47007);
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) rgba(212, 112, 7, 0.3);
+    border-radius: 12px;
+}
+
+/* ============================================================================
+ * NEUMORPHIC SEARCH BAR
+ * ============================================================================ */
+
+.search.neu {
+    background: var(--neu-bg);
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+    border-radius: 24px;
+    padding: var(--spacing-xs);
+}
+
+.search.neu .search-input {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.search.neu .search-btn {
+    background: var(--neu-bg);
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-light);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+}
+
+.search.neu .search-btn:hover {
+    box-shadow:
+        var(--neu-distance-xs) var(--neu-distance-xs) var(--neu-blur-xs) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-xs)) calc(-1 * var(--neu-distance-xs)) var(--neu-blur-xs) var(--neu-shadow-light);
+}
+
+/* ============================================================================
+ * NEUMORPHIC SEGMENTED CONTROL
+ * ============================================================================ */
+
+.segmented-control.neu {
+    background: var(--neu-bg);
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+    border-radius: 16px;
+    padding: 6px;
+}
+
+.segmented-control.neu input[type="radio"]:checked + label {
+    background: var(--neu-bg);
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-light);
+    color: var(--gb-primary);
+}
+
+/* ============================================================================
+ * NEUMORPHIC BADGE
+ * ============================================================================ */
+
+.badge.neu {
+    background: var(--neu-bg);
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-light);
+    color: var(--gb-text-primary);
+    border-radius: 12px;
+    padding: 4px 12px;
+}
+
+.badge.neu-primary {
+    background: linear-gradient(145deg, #f59112, #d47007);
+    color: var(--gb-text-inverse);
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) rgba(212, 112, 7, 0.4),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) rgba(255, 160, 40, 0.4);
+}
+
+/* ============================================================================
+ * NEUMORPHIC PAGINATION
+ * ============================================================================ */
+
+.pagination-btn.neu {
+    background: var(--neu-bg);
+    border: none;
+    box-shadow:
+        var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-light);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn.neu:hover:not(:disabled) {
+    box-shadow:
+        var(--neu-distance-xs) var(--neu-distance-xs) var(--neu-blur-xs) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-xs)) calc(-1 * var(--neu-distance-xs)) var(--neu-blur-xs) var(--neu-shadow-light);
+}
+
+.pagination-btn.neu.active {
+    box-shadow:
+        inset var(--neu-distance-sm) var(--neu-distance-sm) var(--neu-blur-sm) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-sm)) calc(-1 * var(--neu-distance-sm)) var(--neu-blur-sm) var(--neu-shadow-inset-light);
+    background: linear-gradient(145deg, #cdc7bd, #d9d2c6);
+    color: var(--gb-primary);
+}
+
+/* ============================================================================
+ * NEUMORPHIC ACCORDION
+ * ============================================================================ */
+
+.accordion.neu {
+    background: var(--neu-bg);
+    border: none;
+    border-radius: 20px;
+    box-shadow:
+        var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-light);
+}
+
+.accordion.neu .accordion-item {
+    border: none;
+    background: transparent;
+}
+
+.accordion.neu .accordion-header {
+    background: transparent;
+    border: none;
+}
+
+.accordion.neu .accordion-header:hover {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+/* ============================================================================
+ * NEUMORPHIC ALERT
+ * ============================================================================ */
+
+.alert.neu {
+    background: var(--neu-bg);
+    border: none;
+    box-shadow:
+        var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-light);
+    border-radius: 16px;
+    border-left: 4px solid var(--gb-primary);
+}
+
+/* ============================================================================
+ * NEUMORPHIC MODAL
+ * ============================================================================ */
+
+.modal.neu {
+    background: var(--neu-bg);
+    border: none;
+    box-shadow:
+        var(--neu-distance-lg) var(--neu-distance-lg) calc(var(--neu-blur-lg) * 2) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-lg)) calc(-1 * var(--neu-distance-lg)) calc(var(--neu-blur-lg) * 2) var(--neu-shadow-light);
+    border-radius: 24px;
+}
+
+/* ============================================================================
+ * NEUMORPHIC UTILITIES
+ * ============================================================================ */
+
+/* Panel variants */
+.panel.neu {
+    background: var(--neu-bg);
+    box-shadow:
+        var(--neu-distance-md) var(--neu-distance-md) var(--neu-blur-md) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-md)) calc(-1 * var(--neu-distance-md)) var(--neu-blur-md) var(--neu-shadow-light);
+    border-radius: 20px;
+    border: none;
+}
+
+/* Concave surface (pressed in) */
+.neu-concave {
+    background: var(--neu-bg);
+    box-shadow:
+        inset var(--neu-distance-lg) var(--neu-distance-lg) var(--neu-blur-lg) var(--neu-shadow-inset-dark),
+        inset calc(-1 * var(--neu-distance-lg)) calc(-1 * var(--neu-distance-lg)) var(--neu-blur-lg) var(--neu-shadow-inset-light);
+    border-radius: 20px;
+    padding: var(--spacing-lg);
+}
+
+/* Convex surface (raised) */
+.neu-convex {
+    background: var(--neu-bg);
+    box-shadow:
+        var(--neu-distance-lg) var(--neu-distance-lg) var(--neu-blur-lg) var(--neu-shadow-dark),
+        calc(-1 * var(--neu-distance-lg)) calc(-1 * var(--neu-distance-lg)) var(--neu-blur-lg) var(--neu-shadow-light);
+    border-radius: 20px;
+    padding: var(--spacing-lg);
+}
+
+/* ============================================================================
+ * DARK MODE SUPPORT
+ * ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --neu-bg: #2a2a2a;
+        --neu-shadow-light: rgba(255, 255, 255, 0.05);
+        --neu-shadow-dark: rgba(0, 0, 0, 0.5);
+        --neu-shadow-inset-light: rgba(255, 255, 255, 0.03);
+        --neu-shadow-inset-dark: rgba(0, 0, 0, 0.4);
+    }
+}
+
+.dark-mode {
+    --neu-bg: #2a2a2a;
+    --neu-shadow-light: rgba(255, 255, 255, 0.05);
+    --neu-shadow-dark: rgba(0, 0, 0, 0.5);
+    --neu-shadow-inset-light: rgba(255, 255, 255, 0.03);
+    --neu-shadow-inset-dark: rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================================================
+ * REDUCED MOTION SUPPORT
+ * ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .btn.neu,
+    .card.neu,
+    .btn-icon.neu,
+    input.neu,
+    textarea.neu,
+    .neu-raised,
+    .neu-inset {
+        transition: none !important;
+    }
+}
