@@ -55,7 +55,7 @@
             height: 100%;
             background-color: rgba(0,0,0,0.1);
         }
-        #start-audio {
+        #start-audio, #load-files {
             padding: 15px 30px;
             font-size: 18px;
             border: none;
@@ -72,6 +72,11 @@
                 8px 8px 16px rgba(212, 112, 7, 0.4),
                 -8px -8px 16px rgba(255, 160, 40, 0.4);
         }
+
+        #load-files:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
         .pad:nth-child(4n+1) { background-color: #E6E8BF; }
         .pad:nth-child(4n+2) { background-color: #DDDA00; }
         .pad:nth-child(4n+3) { background-color: #F27900; }
@@ -83,14 +88,14 @@
             transform: scale(0.95);
         }
 
-        #start-audio:hover:not(:disabled) {
+        #start-audio:hover:not(:disabled), #load-files:hover:not(:disabled) {
             box-shadow:
                 12px 12px 24px rgba(212, 112, 7, 0.5),
                 -12px -12px 24px rgba(255, 160, 40, 0.5);
             transform: translateY(-1px);
         }
 
-        #start-audio:active:not(:disabled) {
+        #start-audio:active:not(:disabled), #load-files:active:not(:disabled) {
             box-shadow:
                 inset 4px 4px 8px rgba(212, 112, 7, 0.3),
                 inset -4px -4px 8px rgba(255, 160, 40, 0.3);
@@ -117,7 +122,7 @@
                 margin-bottom: 15px;
                 gap: 15px;
             }
-            #start-audio {
+            #start-audio, #load-files {
                 padding: 12px 24px;
                 font-size: 16px;
             }
@@ -143,7 +148,7 @@
                 margin-bottom: 10px;
                 gap: 10px;
             }
-            #start-audio {
+            #start-audio, #load-files {
                 padding: 10px 20px;
                 font-size: 15px;
             }
@@ -169,7 +174,7 @@
                 margin-bottom: 8px;
                 gap: 8px;
             }
-            #start-audio {
+            #start-audio, #load-files {
                 padding: 8px 16px;
                 font-size: 14px;
             }
@@ -196,7 +201,7 @@
                 margin-bottom: 5px;
                 gap: 5px;
             }
-            #start-audio {
+            #start-audio, #load-files {
                 padding: 6px 12px;
                 font-size: 13px;
             }
@@ -225,7 +230,7 @@
             .controls {
                 margin-bottom: 3px;
             }
-            #start-audio {
+            #start-audio, #load-files {
                 padding: 5px 10px;
                 font-size: 12px;
             }
@@ -255,7 +260,9 @@
     <h1>Sampler Player con Visualizador</h1>
     <div class="controls">
         <button id="start-audio">Iniciar Audio</button>
+        <button id="load-files" disabled>Cargar Archivos</button>
     </div>
+    <input type="file" id="file-input" accept="audio/*" multiple style="display: none;">
     <div id="status-message"></div>
     <div id="pad-grid"></div>
 
@@ -290,12 +297,15 @@
     ];
 
     document.getElementById('start-audio').addEventListener('click', initAudio);
+    document.getElementById('load-files').addEventListener('click', openFileDialog);
+    document.getElementById('file-input').addEventListener('change', handleFileSelection);
 
     function initAudio() {
         try {
             audioContext = new (window.AudioContext || window.webkitAudioContext)();
             audioInitialized = true;
             document.getElementById('start-audio').disabled = true;
+            document.getElementById('load-files').disabled = false;
             updateStatus('Audio iniciado. Listo para reproducir.');
             createPadGrid();
             initMIDI();
@@ -304,6 +314,54 @@
             console.error('Error al iniciar el audio:', error);
             updateStatus('Error al iniciar el audio. Por favor, recarga la página e intenta de nuevo.');
         }
+    }
+
+    function openFileDialog() {
+        document.getElementById('file-input').click();
+    }
+
+    function handleFileSelection(event) {
+        const files = Array.from(event.target.files);
+        if (files.length === 0) return;
+
+        updateStatus(`Cargando ${files.length} archivo(s)...`);
+
+        files.forEach((file, index) => {
+            const padNumber = index + 1;
+            if (padNumber > 16) {
+                console.warn(`Solo se pueden cargar 16 archivos. Ignorando: ${file.name}`);
+                return;
+            }
+
+            loadFileIntoPad(file, padNumber);
+        });
+
+        // Clear the file input so the same files can be loaded again if needed
+        event.target.value = '';
+    }
+
+    function loadFileIntoPad(file, padNumber) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            audioContext.decodeAudioData(e.target.result)
+                .then(audioBuffer => {
+                    samples[padNumber] = audioBuffer;
+                    updateStatus(`"${file.name}" cargado en el Pad ${padNumber}`);
+                    document.querySelector(`.pad:nth-child(${padNumber})`).classList.add('loaded');
+                })
+                .catch(error => {
+                    console.error(`Error decodificando ${file.name}:`, error);
+                    updateStatus(`Error al cargar "${file.name}". Formato no soportado.`);
+                });
+        };
+
+        reader.onerror = function() {
+            console.error(`Error leyendo ${file.name}`);
+            updateStatus(`Error al leer "${file.name}"`);
+        };
+
+        reader.readAsArrayBuffer(file);
     }
 
     function initMIDI() {
