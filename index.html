@@ -2,11 +2,16 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="mobile-web-app-capable" content="yes">
     <title>Sampler Player con Visualizador</title>
     <link rel="stylesheet" href="neumorphic-design.css">
     <style>
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100vw;
+        }
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -14,6 +19,10 @@
             background-color: #d9d2c6;
             color: #333333;
             touch-action: none;
+            box-sizing: border-box;
+        }
+        *, *::before, *::after {
+            box-sizing: border-box;
         }
         h1 {
             text-align: center;
@@ -25,6 +34,7 @@
             align-items: center;
             gap: 20px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         #pad-grid {
             display: grid;
@@ -252,6 +262,77 @@
             #status-message {
                 margin-top: 3px;
                 font-size: 10px;
+            }
+        }
+
+        /* Mobile width responsiveness */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.3rem;
+                margin: 10px 0;
+            }
+            .controls {
+                gap: 10px;
+                margin-bottom: 15px;
+            }
+            #start-audio, #load-files {
+                padding: 10px 20px;
+                font-size: 15px;
+            }
+            #pad-grid {
+                gap: 12px;
+                max-width: 100%;
+                padding: 0 10px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            body {
+                padding: 8px;
+            }
+            h1 {
+                font-size: 1.1rem;
+                margin: 8px 0;
+            }
+            .controls {
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            #start-audio, #load-files {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+            #pad-grid {
+                gap: 8px;
+                padding: 0 5px;
+            }
+        }
+
+        @media (max-width: 320px) {
+            body {
+                padding: 5px;
+            }
+            h1 {
+                font-size: 1rem;
+                margin: 5px 0;
+            }
+            .controls {
+                gap: 5px;
+                margin-bottom: 10px;
+            }
+            #start-audio, #load-files {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+            #pad-grid {
+                gap: 6px;
+                padding: 0;
+            }
+            .pad {
+                border-radius: 12px;
             }
         }
     </style>
