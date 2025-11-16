@@ -11,28 +11,56 @@ Versión standalone del Sampler Player web convertido a JUCE.
 - ✅ **Reproducción múltiple** - Reproduce múltiples samples simultáneamente
 - ✅ **Indicadores visuales** - Los pads muestran estado (cargado/reproduciendo)
 
+## 🚀 Inicio Rápido
+
+### Linux/macOS
+
+```bash
+# Compila el proyecto
+./build.sh
+
+# Ejecuta la aplicación
+./run.sh
+```
+
+### Windows
+
+```batch
+REM Compila el proyecto
+build.bat
+
+REM Ejecuta la aplicación
+run.bat
+```
+
+Los scripts descargarán JUCE automáticamente y compilarán todo por ti.
+
 ## Requisitos
 
-### 1. JUCE Framework
+### 1. CMake
 
-Descarga e instala JUCE desde: https://juce.com/get-juce/download
-
-**Versión recomendada:** JUCE 7.0 o superior
+Necesitas CMake 3.15 o superior. Descarga desde: https://cmake.org/download/
 
 ### 2. Compilador C++
 
-- **Windows:** Visual Studio 2022 (Community Edition es suficiente)
-- **macOS:** Xcode 13 o superior
+- **Windows:** Visual Studio 2022 (Community Edition es suficiente) o MinGW
+- **macOS:** Xcode 13 o superior (instala con: `xcode-select --install`)
 - **Linux:** GCC 9+ o Clang 10+
 
-### 3. Dependencias Linux (solo Linux)
+### 3. Git
+
+Para descargar JUCE automáticamente. Descarga desde: https://git-scm.com/
+
+### 4. Dependencias Linux (solo Linux)
 
 ```bash
-sudo apt-get install libasound2-dev libjack-jackd2-dev \
+sudo apt-get update
+sudo apt-get install build-essential git cmake \
+    libasound2-dev libjack-jackd2-dev \
     ladspa-sdk \
-    libcurl4-openssl-dev  \
+    libcurl4-openssl-dev \
     libfreetype6-dev \
-    libx11-dev libxcomposite-dev libxcursor-dev libxcursor-dev \
+    libx11-dev libxcomposite-dev libxcursor-dev \
     libxext-dev libxinerama-dev libxrandr-dev libxrender-dev \
     libwebkit2gtk-4.0-dev \
     libglu1-mesa-dev mesa-common-dev
@@ -40,81 +68,126 @@ sudo apt-get install libasound2-dev libjack-jackd2-dev \
 
 ## Compilación
 
-### Método 1: Usando Projucer (Recomendado)
+### Método 1: Usando CMake (Recomendado) ⭐
 
-1. **Abre Projucer** (viene con JUCE)
+CMake descargará JUCE automáticamente, no necesitas instalarlo manualmente.
 
-2. **Abre el proyecto:**
-   - File → Open → Selecciona `SamplerPlayer.jucer`
+#### Windows (Visual Studio)
 
-3. **Configura las rutas de JUCE:**
-   - En Projucer, ve a Settings (ícono de engranaje)
-   - En "Global Paths", configura "Path to JUCE" apuntando a tu instalación de JUCE
-
-4. **Exporta el proyecto:**
-   - En Projucer, guarda el proyecto (Ctrl/Cmd+S)
-   - Esto generará los archivos de proyecto nativos en `Builds/`
-
-5. **Compila:**
-   - **Windows:** Abre `Builds/VisualStudio2022/SamplerPlayer.sln` y compila (F7)
-   - **macOS:** Abre `Builds/MacOSX/SamplerPlayer.xcodeproj` y compila (Cmd+B)
-   - **Linux:**
-     ```bash
-     cd Builds/LinuxMakefile
-     make CONFIG=Release
-     ```
-
-### Método 2: CMake (Alternativo)
-
-Si prefieres usar CMake, puedes crear un `CMakeLists.txt`:
-
-```cmake
-cmake_minimum_required(VERSION 3.15)
-project(SamplerPlayer VERSION 1.0.0)
-
-add_subdirectory(JUCE)  # Apunta a tu instalación de JUCE
-
-juce_add_gui_app(SamplerPlayer
-    PRODUCT_NAME "SamplerPlayer")
-
-target_sources(SamplerPlayer PRIVATE
-    Source/Main.cpp
-    Source/MainComponent.cpp
-    Source/MainComponent.h)
-
-target_compile_definitions(SamplerPlayer PRIVATE
-    JUCE_USE_CURL=0
-    JUCE_WEB_BROWSER=0)
-
-target_link_libraries(SamplerPlayer PRIVATE
-    juce::juce_audio_basics
-    juce::juce_audio_devices
-    juce::juce_audio_formats
-    juce::juce_audio_utils
-    juce::juce_core
-    juce::juce_data_structures
-    juce::juce_events
-    juce::juce_graphics
-    juce::juce_gui_basics
-    juce::juce_gui_extra)
-```
-
-Luego compila con:
 ```bash
+# Navega al directorio del proyecto
+cd JUCESampler
+
+# Crea el directorio de build
 mkdir build
 cd build
-cmake ..
+
+# Genera el proyecto Visual Studio
+cmake .. -G "Visual Studio 17 2022" -A x64
+
+# Compila (Release)
 cmake --build . --config Release
+
+# El ejecutable estará en: build/SamplerPlayer_artefacts/Release/SamplerPlayer.exe
 ```
+
+O abre `build/SamplerPlayer.sln` en Visual Studio y compila desde ahí (Ctrl+Shift+B).
+
+#### macOS (Xcode)
+
+```bash
+# Navega al directorio del proyecto
+cd JUCESampler
+
+# Crea el directorio de build
+mkdir build
+cd build
+
+# Genera el proyecto Xcode
+cmake .. -G "Xcode"
+
+# Compila (Release)
+cmake --build . --config Release
+
+# El .app estará en: build/SamplerPlayer_artefacts/Release/SamplerPlayer.app
+```
+
+O abre `build/SamplerPlayer.xcodeproj` en Xcode y compila desde ahí (Cmd+B).
+
+#### Linux (Makefile)
+
+```bash
+# Navega al directorio del proyecto
+cd JUCESampler
+
+# Crea el directorio de build
+mkdir build
+cd build
+
+# Genera Makefiles con Release build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+
+# Compila (usa -j para compilación paralela)
+cmake --build . -j$(nproc)
+
+# O simplemente:
+make -j$(nproc)
+
+# El ejecutable estará en: build/SamplerPlayer_artefacts/Release/SamplerPlayer
+```
+
+#### Opciones adicionales de CMake
+
+```bash
+# Build tipo Debug (con símbolos de debugging)
+cmake .. -DCMAKE_BUILD_TYPE=Debug
+
+# Especificar un compilador diferente
+cmake .. -DCMAKE_CXX_COMPILER=clang++
+
+# Usar JUCE instalado localmente en vez de descargarlo
+# (edita CMakeLists.txt y comenta la sección FetchContent,
+#  descomenta find_package(JUCE CONFIG REQUIRED))
+```
+
+### Método 2: Usando los scripts de compilación (Más fácil) ⚡
+
+Usa los scripts incluidos para compilar automáticamente:
+
+**Linux/macOS:**
+```bash
+./build.sh           # Compila en modo Release
+./build.sh --debug   # Compila en modo Debug
+./build.sh --clean   # Limpia y recompila
+```
+
+**Windows:**
+```batch
+build.bat           REM Compila en modo Release
+build.bat --debug   REM Compila en modo Debug
+build.bat --clean   REM Limpia y recompila
+```
+
+### Método 3: Usando Projucer (Alternativo)
+
+Si prefieres usar Projucer:
+
+1. Descarga JUCE desde https://juce.com/get-juce/download
+2. Abre `SamplerPlayer.jucer` en Projucer
+3. Configura la ruta de JUCE en Settings → Global Paths
+4. Guarda el proyecto (genera archivos en `Builds/`)
+5. Abre y compila el proyecto generado
 
 ## Uso
 
 ### Ejecutar la aplicación
 
-Una vez compilado, el ejecutable estará en:
-- **Windows:** `Builds/VisualStudio2022/x64/Release/SamplerPlayer.exe`
-- **macOS:** `Builds/MacOSX/build/Release/SamplerPlayer.app`
-- **Linux:** `Builds/LinuxMakefile/build/SamplerPlayer`
+Una vez compilado con CMake, el ejecutable estará en:
+- **Windows:** `build/SamplerPlayer_artefacts/Release/SamplerPlayer.exe`
+- **macOS:** `build/SamplerPlayer_artefacts/Release/SamplerPlayer.app`
+- **Linux:** `build/SamplerPlayer_artefacts/Release/SamplerPlayer`
+
+Si compilaste en modo Debug, reemplaza `Release` con `Debug` en las rutas.
 
 ### Cargar samples
 
@@ -143,12 +216,17 @@ Para un pad controller típico (Akai MPD, Novation Launchpad, etc.):
 
 ```
 JUCESampler/
-├── SamplerPlayer.jucer       # Proyecto JUCE (ábrelo en Projucer)
+├── CMakeLists.txt            # Configuración de CMake
+├── SamplerPlayer.jucer       # Proyecto JUCE (para Projucer)
+├── build.sh                  # Script de compilación (Linux/macOS)
+├── build.bat                 # Script de compilación (Windows)
+├── run.sh                    # Script de ejecución (Linux/macOS)
+├── run.bat                   # Script de ejecución (Windows)
 ├── Source/
 │   ├── Main.cpp              # Punto de entrada de la aplicación
 │   ├── MainComponent.h       # Header del componente principal
 │   └── MainComponent.cpp     # Implementación del sampler
-├── Builds/                   # Carpetas de compilación (generadas por Projucer)
+├── build/                    # Directorio de compilación (generado)
 └── README.md                 # Este archivo
 ```
 

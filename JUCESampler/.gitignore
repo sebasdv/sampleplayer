@@ -1,0 +1,52 @@
+# CMake build directory
+build/
+cmake-build-*/
+
+# JUCE generated files
+Builds/
+JuceLibraryCode/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# macOS
+.DS_Store
+*.xcworkspace
+xcuserdata/
+
+# Windows
+*.exe
+*.dll
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+Thumbs.db
+desktop.ini
+
+# Linux
+*.o
+*.a
+*.so
+
+# Compiled binaries
+*.app
+
+# User settings
+*.user
+*.suo
+*.ncb
+*.sdf
+*.opensdf
+*.VC.db
+*.VC.VC.opendb
+
+# Backup files
+*~
+*.bak
+*.tmp
